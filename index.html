@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrological Monitoring System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .threshold-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .threshold-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .threshold-info ul {
+            color: #856404;
+            margin-left: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 Hydrological Monitoring</h1>
+            <p>Real-time Flood Risk Assessment System</p>
+        </div>
+
+        <div class="threshold-info">
+            <h4>⚠️ Alert Thresholds</h4>
+            <ul>
+                <li>Water Level > 5.0 meters → CRITICAL</li>
+                <li>Rainfall > 100 mm → CRITICAL</li>
+                <li>Discharge > 500 m³/s → CRITICAL</li>
+            </ul>
+        </div>
+
+        <form id="hydroForm">
+            <div class="form-group">
+                <label for="location">Station Location</label>
+                <select id="location" name="location" required>
+                    <option value="">Select Station</option>
+                    <option value="River Niger - Sector A">River Niger - Sector A</option>
+                    <option value="River Niger - Sector B">River Niger - Sector B</option>
+                    <option value="Benue River - Lokoja">Benue River - Lokoja</option>
+                    <option value="Cross River - Calabar">Cross River - Calabar</option>
+                    <option value="Niger Delta - Port Harcourt">Niger Delta - Port Harcourt</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rainfall">Rainfall (mm)</label>
+                <input type="number" id="rainfall" name="rainfall" step="0.1" min="0" required 
+                       placeholder="e.g., 45.5">
+                <div class="input-hint">Current rainfall measurement in millimeters</div>
+            </div>
+
+            <div class="form-group">
+                <label for="water_level">Water Level (meters)</label>
+                <input type="number" id="water_level" name="water_level" step="0.01" min="0" required 
+                       placeholder="e.g., 4.25">
+                <div class="input-hint">Current water level from reference point</div>
+            </div>
+
+            <div class="form-group">
+                <label for="discharge">Discharge Rate (m³/s)</label>
+                <input type="number" id="discharge" name="discharge" step="0.1" min="0" required 
+                       placeholder="e.g., 320.5">
+                <div class="input-hint">Flow rate in cubic meters per second</div>
+            </div>
+
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">System Ready - Connected to Power Automate</span>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                📡 Submit Hydrological Data
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #666;">Sending data to monitoring system...</p>
+            </div>
+        </form>
+
+        <div id="alertBox" class="alert-box"></div>
+    </div>
+
+    <script>
+        // ⚠️ REPLACE THIS WITH YOUR ACTUAL POWER AUTOMATE HTTP TRIGGER URL
+        const POWER_AUTOMATE_URL = 'https://default48e4597ff6ce492594d617e3be3f5f.5a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f49844d891554a8ea3c36f27083aa3f0/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=F7VDo48TULKUFO-GN2oRskuKA-CD5Gpf1rZozH7bhL8';
+
+        document.getElementById('hydroForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const alertBox = document.getElementById('alertBox');
+            
+            // Get form values
+            const data = {
+                location: document.getElementById('location').value,
+                rainfall: parseFloat(document.getElementById('rainfall').value),
+                water_level: parseFloat(document.getElementById('water_level').value),
+                discharge: parseFloat(document.getElementById('discharge').value),
+                timestamp: new Date().toISOString(),
+                station_id: 'HYDRO-' + Math.random().toString(36).substr(2, 9).toUpperCase()
+            };
+
+            // UI Loading State
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            alertBox.style.display = 'none';
+
+            try {
+                const response = await fetch(POWER_AUTOMATE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert('success', `✅ Data submitted successfully! ${result.message || 'Monitoring system updated.'}`);
+                    document.getElementById('hydroForm').reset();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', '❌ Failed to submit data. Please check your connection and try again.');
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        function showAlert(type, message) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert-box alert-${type}`;
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Real-time validation
+        document.getElementById('water_level').addEventListener('input', function(e) {
+            const value = parseFloat(e.target.value);
+            if (value > 5.0) {
+                e.target.style.borderColor = '#dc3545';
+            } else {
+                e.target.style.borderColor = '#e0e0e0';
+            }
+        });
+
+        document.getElementById('rainfall').addEventListener('input', function(e) {
+            const value = parseFloat(e.target.value);
+            if (value > 100) {
+                e.target.style.borderColor = '#dc3545';
+            } else {
+                e.target.style.borderColor = '#e0e0e0';
+            }
+        });
+    </script>
+</body>
+</html>
